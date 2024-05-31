@@ -1,0 +1,11 @@
+[default]
+duration = "30m"
+mode = "center"
+# sorting = "ascending"
+
+[DP-1]
+path = "/run/media/jer/ARCHIVE/HIMAWARI_DATA/completed"
+
+
+[DP-2]
+path = "/run/media/jer/ARCHIVE/HIMAWARI_DATA/completed"

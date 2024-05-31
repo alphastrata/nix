@@ -1,0 +1,88 @@
+theme = "bogster"
+
+[editor]
+line-number = "relative"
+scrolloff = 4
+mouse = true
+completion-trigger-len = 3
+auto-info = true
+true-color = true
+idle-timeout = 0
+color-modes = true
+
+[editor.soft-wrap]
+enable = true
+
+[editor.lsp]
+display-inlay-hints = true
+
+[editor.indent-guides]
+render = true
+character = "╎"
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "bar"
+select = "block"
+
+[editor.file-picker]
+hidden = false # Show hidden files in the pickers (telescope ripoffs)
+
+[keys.normal]
+# LSP HOVER 
+K = "hover"
+esc = ["collapse_selection", "keep_primary_selection"]
+X = [
+  "extend_line_up",
+  "extend_to_line_bounds",
+] # so bigX behaves like the opposite of lil x
+
+# I seem to have trouble getting my OS' clipboards to behave well with helix so...
+y = ":clipboard-yank"
+p = ":clipboard-paste-after"
+
+# g mods 
+g = { a = "code_action" } # Maps `ga` to show possible code actions
+
+# COLEMAK
+h = "move_char_left"
+e = "move_line_up"
+n = "move_line_down"
+i = "move_char_right"
+t = "insert_mode"
+T = "insert_at_line_start"
+D = "kill_to_line_end"     #the alternative being vgld, which I think is too much
+
+#Custom CodeLLama runners
+[keys.select.l]
+p= ":pipe $HELIX_CONFIG/phind.sh"
+l= ":pipe $HELIX_CONFIG/llama-pro.sh"
+c= ":pipe $HELIX_CONFIG/codellama-13.sh"
+
+[keys.insert]
+"esc" = "normal_mode"
+
+[keys.normal.C-w]
+h = "jump_view_left"
+e = "jump_view_up"
+n = "jump_view_down"
+i = "jump_view_right"
+
+# Spacemods
+[keys.normal.space]
+w = ":w"
+h = "goto_prev_diag"
+L = ":set lsp.display-inlay-hints false"
+l = ":set lsp.display-inlay-hints true"
+i = "goto_next_diag"
+q = ":buffer-close!"
+r = { n = "rename_symbol" }
+tab = ":buffer-next"
+S-tab = ":buffer-previous"
+c = { l = "toggle_comments" }
+
+#search, as I remap 'n' for colemak the default search/search_previous bindings are skux.
+n = "search_next"
+e = "search_prev"
+
+[editor.statusline]
