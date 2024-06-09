@@ -8,10 +8,14 @@
       <home-manager/nixos>
     ];
 
-  # Bootloader.
+  # Boot
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/nvme0n1";
   boot.loader.grub.useOSProber = true;
+
+  # Virtual webcam
+  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+  boot.kernelModules = [ "v4l2loopback" ];
 
   boot.initrd.luks.devices."luks-69d62f69-3daa-4d4a-803e-8a52f3bb9bd8".device = "/dev/disk/by-uuid/69d62f69-3daa-4d4a-803e-8a52f3bb9bd8";
   # Setup keyfile
@@ -65,18 +69,25 @@
     options = "--delete-older-than 7d";
   };
   
-
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+  services.xserver.videoDrivers = ["nvidiaBeta"];
+
+  # SOMEDAY!
+  # Enable the COSMIC Desktop Environment.
+  # services.desktopManager.cosmic.enable = true;
+  # services.displayManager.cosmic-greeter.enable = true;
+  # services.xserver.displayManager.cosmic.autoSuspend = false;
 
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
-  services.xserver.displayManager.gdm.autoSuspend = false;
   services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.displayManager.gdm.autoSuspend = false;
+  
 
   # Configure keymap in X11
   services.xserver = {
-    layout = "au";
+    xkb.layout = "au";
     xkb.variant = "";
   };
 
@@ -106,7 +117,6 @@
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.fish;
     packages = with pkgs; [
-    #  thunderbird
     discord
     chromium
     signal-desktop
@@ -115,12 +125,12 @@
   };
 
   # Enable automatic login for the user.
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "jer";
+  # services.displayManager.autoLogin.enable = true;
+  # services.displayManager.autoLogin.user = "jer";
 
-  # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
-  systemd.services."getty@tty1".enable = false;
-  systemd.services."autovt@tty1".enable = false;
+  # # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
+  # systemd.services."getty@tty1".enable = false;
+  # systemd.services."autovt@tty1".enable = false;
 
   # Install firefox.
   programs.firefox.enable = true;
@@ -136,10 +146,12 @@
     at-spi2-atk
     at-spi2-core
     atk
+    binutils
     cairo
     cudatoolkit
     cups
     curl
+    clang
     dbus
     expat
     openssl
@@ -166,11 +178,17 @@
     nspr
     nss
     pango
+    pavucontrol
     pipewire
+    playerctl
     pkg-config
+    pulseaudioFull
     systemd
     udev
     vulkan-loader
+    xwayland             
+    xwaylandvideobridge  
+    wayland              
     xorg.libX11
     xorg.libXScrnSaver
     xorg.libXcomposite
@@ -198,19 +216,22 @@
     # Essential Utilities
     alacritty    # Terminal emulator
     bat          # Enhanced cat command
+    bc           # GNU Calculator
     delta        # Git diff viewer
     du-dust      # du + rust, like `du` but betterererer
     eza          # Modern ls command
     fd           # User-friendly find command
-    ffmpeg       # Multimedia framework
+    ffmpeg-full  # Multimedia framework
     fish         # Friendly interactive shell
     git          # Version control system
     gh           # Official Github CLI tool
     helix        # Text editor
     lsd          # Modern ls command
     neofetch     # System information tool
+    ollama       # CLI llm management
     ripgrep      # more modern grep
     starship     # Shell prompt
+    sd           # Better sed
     tailscale    # VPN service
     wget         # Network downloader
     zoxide       # Directory jumper
@@ -228,7 +249,10 @@
     docker-compose       # Docker container management
     dunst                # Notification daemon
     fontconfig
+    fontconfig.dev
     gcc                  # a C compiler
+    glibc
+    glib
     gnumake              # Build automation tool
     lazydocker           # Docker UI
     libGL
@@ -245,6 +269,21 @@
     systemd
     udev
     udev.dev             # Device manager
+    xorg.libX11
+    xorg.libXScrnSaver
+    xorg.libXcomposite
+    xorg.libXcursor
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXi
+    xorg.libXrandr
+    xorg.libXrender
+    xorg.libXtst
+    xorg.libxcb
+    xorg.libxkbfile
+    xorg.libxshmfence
+    zlib
 
     #GOPHERIT
     go                   # Programming language
@@ -258,13 +297,6 @@
     # Python 3.11 and associated tools
     pyenv                # Python version manager
     poetry               # Dependency management & Packaging
-    python311Full
-    python311Packages.pynvml
-    python311Packages.pip
-    python311Packages.setuptools
-    python311Packages.wheel
-    python311Packages.rope
-
     python312Full
     python312Packages.pip
     python312Packages.setuptools
@@ -277,13 +309,6 @@
     typescript           # JavaScript superset
     vscode               # Emergency editor #PUKE
     sublime4     # Text editor
-
-    # GNOME Extensions
-    gnome.gnome-tweaks   # GNOME tweaking tool
-    gnomeExtensions.pop-shell # GNOME tiling window extension
-
-    # Fonts
-    nerdfonts            # Patched developer fonts
 
     # Gaming
     lutris               # Gaming platform
@@ -309,6 +334,9 @@
     xorg.libXcursor      # Xorg cursor library
     xorg.libXi           # Xorg input library
     xorg.libXrandr       # Xorg RandR extension
+    v4l-utils            # Virtual webcam
+    vlc                  # Media player
+    obs-studio           # Streaming / Sceen-recording
 
 
     # Additional utilities and tools
@@ -324,15 +352,36 @@
     # GpGPU
     cudaPackages.cuda_nvml_dev # CUDA NVML headers
     cudaPackages.cudatoolkit   # Compiler, maths libraries, tools
-    #
-  ];
+    
+
+    # ICE STUFF:
+    # marwaita-pop_os
+    # gnome.gnome-tweaks   # GNOME tweaking tool
+    # gnomeExtensions.pop-shell # GNOME tiling window extension
+    # gnomeExtensions.shortcuts
+    # gnomeExtensions.awesome-tiles
+    # gnomeExtensions.transparent-topbar
+    # gnomeExtensions.pop-launcher-super-key
+    # pop-launcher
+    cosmic-icons
+    # cosmic-panel
+    # cosmic-comp
+    # cosmic-greeter
+    # cosmic-settings
+      ];
 
   environment.variables = {
     EDITOR = "${pkgs.helix}/bin/hx";
     SUDO_EDITOR = "${pkgs.helix}/bin/hx";
     NIXOS_OZONE_WL = "1";
     NIXPKGS_ALLOW_UNFREE = "1";
+    WINIT_UNIX_BACKEND = "wayland";
   };
+
+  fonts.packages = with pkgs;[
+    nerdfonts
+    hasklig  
+  ];
 
   # Enable services.
   services.openssh.enable = true;
@@ -341,6 +390,7 @@
 
 
   # Podman (AINC WORK STUFF)
+
   virtualisation.containers.enable = true;
   virtualisation = {
     podman = {
@@ -354,25 +404,15 @@
     };
   };
   
-
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   networking.firewall.enable = false;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.11"; # Did you read the comment?
-
-
 # Auto Update
   system.autoUpgrade = {
-    enable = true;
+    enable = false;
     # flake = inputs.self.outPath;
     flags = [
       "--update-input"
@@ -381,7 +421,19 @@
     ];
     dates = "09:00";
     randomizedDelaySec = "45min";
+
+    
   };
+
+
+  # This value determines the NixOS release from which the default
+  # settings for stateful data, like file locations and database versions
+  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # this value at the release version of the first install of this system.
+  # Before changing this value read the documentation for this option
+  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  system.stateVersion = "23.11"; # Did you read the comment?
+  
 
 
 }
